@@ -26,6 +26,8 @@ def _image_data_uri(*relative_path: str) -> str:
     path = _STATIC_DIR.joinpath(*relative_path)
     encoded = base64.b64encode(path.read_bytes()).decode("ascii")
     return f"data:image/png;base64,{encoded}"
+    
+st.page_link("app.py", label="Back to Grant Application Quality Checker", icon=":material/arrow_back:")
 
 
 _LOGO_SRC = _image_data_uri("guide", "images", "nsw-ra-logo.png")
