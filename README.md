@@ -85,10 +85,13 @@ so screening the paste no longer freezes the upload page.
 ## Styling
 
 The NSW Design System stylesheet (v3.24.10, MIT licensed) is vendored at
-`static/vendor/` and served through Streamlit's static file route
-(`server.enableStaticServing` in `.streamlit/config.toml`), so branding does
-not depend on CDN availability inside firewalled networks. Application-specific
-styles live in `static/css/main.css`.
+`static/vendor/` and inlined directly into each page's HTML (read from disk
+and wrapped in a `<style>` tag), so branding does not depend on CDN
+availability inside firewalled networks, nor on Streamlit's static file
+route — which is unreliable on some hosts, including Streamlit Community
+Cloud. Application-specific styles live in `static/css/main.css`. Images
+(the splash/header logo, the Guide page screenshots) are likewise inlined —
+as raw SVG markup or base64 data URIs — rather than referenced by URL.
 
 ## Running
 

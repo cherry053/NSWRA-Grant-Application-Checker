@@ -6,9 +6,35 @@ System stylesheet (no CDN fonts or icon fonts, so it renders inside
 firewalled government networks like the rest of the app).
 """
 
+import base64
+from pathlib import Path
+
 import streamlit as st
 
 st.set_page_config(page_title="User Instruction Manual | Grant Application Quality Checker", layout="wide")
+
+# Assets are inlined (stylesheet as <style>, images as data URIs) rather than
+# served via Streamlit's "/app/static/..." route: that route depends on
+# server.enableStaticServing and is unreliable on some deployment hosts
+# (e.g. Streamlit Community Cloud), which left the page unstyled and its
+# images broken.
+_STATIC_DIR = Path(__file__).parent.parent / "static"
+_DESIGN_SYSTEM_CSS = (_STATIC_DIR / "vendor" / "nsw-design-system-3.24.10.css").read_text()
+
+
+def _image_data_uri(*relative_path: str) -> str:
+    path = _STATIC_DIR.joinpath(*relative_path)
+    encoded = base64.b64encode(path.read_bytes()).decode("ascii")
+    return f"data:image/png;base64,{encoded}"
+
+
+_LOGO_SRC = _image_data_uri("guide", "images", "nsw-ra-logo.png")
+_STEP1_SRC = _image_data_uri("guide", "images", "step1-download-pdf.png")
+_STEP2_SRC = _image_data_uri("guide", "images", "step2-upload-pdf.png")
+_STEP3A_SRC = _image_data_uri("guide", "images", "step3-damage-table-1.png")
+_STEP3B_SRC = _image_data_uri("guide", "images", "step3-damage-table-2.png")
+_STEP4_SRC = _image_data_uri("guide", "images", "step4-paste-table.png")
+_STEP5_SRC = _image_data_uri("guide", "images", "step5-check-application.png")
 
 st.html(
     """
@@ -24,7 +50,9 @@ st.html(
     """
 )
 GUIDE_HTML = """
-<link rel="stylesheet" href="/app/static/vendor/nsw-design-system-3.24.10.css">
+<style>
+__DESIGN_SYSTEM_CSS__
+</style>
 
 <style>
 /* Hide Streamlit chrome so the guide fills the window */
@@ -114,7 +142,7 @@ main figure img {
       <div class="nsw-header__main">
         <div class="nsw-header__image">
           <a href="https://www.nsw.gov.au/departments-and-agencies/nsw-reconstruction-authority">
-          <img src="/app/static/guide/images/nsw-ra-logo.png" alt="NSW Reconstruction Authority logo" class="nsw-header__logo-img">
+          <img src="__LOGO_SRC__" alt="NSW Reconstruction Authority logo" class="nsw-header__logo-img">
           </a>
         </div>
         <div class="nsw-header__name">
@@ -185,7 +213,7 @@ main figure img {
           <li>Save the PDF to your computer.</li>
         </ul>
         <figure>
-          <img src="/app/static/guide/images/step1-download-pdf.png" alt="PDF download screen in SmartyGrants">
+          <img src="__STEP1_SRC__" alt="PDF download screen in SmartyGrants">
           <figcaption>PDF download screen</figcaption>
         </figure>
       </div>
@@ -197,7 +225,7 @@ main figure img {
           <li>Upload the SmartyGrants PDF.</li>
         </ul>
         <figure>
-          <img src="/app/static/guide/images/step2-upload-pdf.png" alt="Uploading the PDF into the Grant Application Quality Checker">
+          <img src="__STEP2_SRC__" alt="Uploading the PDF into the Grant Application Quality Checker">
           <figcaption>Upload PDF into checker</figcaption>
         </figure>
       </div>
@@ -209,11 +237,11 @@ main figure img {
           <li>Copy the table.</li>
         </ul>
         <figure>
-          <img src="/app/static/guide/images/step3-damage-table-1.png" alt="Damaged asset table shown on SmartyGrants">
+          <img src="__STEP3A_SRC__" alt="Damaged asset table shown on SmartyGrants">
           <figcaption>Damaged asset table on SmartyGrants</figcaption>
         </figure>
         <figure>
-          <img src="/app/static/guide/images/step3-damage-table-2.png" alt="Damaged asset table shown on SmartyGrants, continued">
+          <img src="__STEP3B_SRC__" alt="Damaged asset table shown on SmartyGrants, continued">
         </figure>
       </div>
 
@@ -223,7 +251,7 @@ main figure img {
           <li>Paste the damaged asset table into the text field in the Grant Checker.</li>
         </ul>
         <figure>
-          <img src="/app/static/guide/images/step4-paste-table.png" alt="Pasting the asset table into the text field in the Grant Checker">
+          <img src="__STEP4_SRC__" alt="Pasting the asset table into the text field in the Grant Checker">
           <figcaption>Paste table into text field</figcaption>
         </figure>
       </div>
@@ -235,7 +263,7 @@ main figure img {
           <li>Select <strong>Check Application</strong>.</li>
         </ul>
         <figure>
-          <img src="/app/static/guide/images/step5-check-application.png" alt="Upload page showing PDF and text field upload">
+          <img src="__STEP5_SRC__" alt="Upload page showing PDF and text field upload">
           <figcaption>Upload page showing PDF and text field upload</figcaption>
         </figure>
       </div>
@@ -340,6 +368,17 @@ main figure img {
   </div>
 </footer>
 """
+
+GUIDE_HTML = (
+    GUIDE_HTML.replace("__DESIGN_SYSTEM_CSS__", _DESIGN_SYSTEM_CSS)
+    .replace("__LOGO_SRC__", _LOGO_SRC)
+    .replace("__STEP1_SRC__", _STEP1_SRC)
+    .replace("__STEP2_SRC__", _STEP2_SRC)
+    .replace("__STEP3A_SRC__", _STEP3A_SRC)
+    .replace("__STEP3B_SRC__", _STEP3B_SRC)
+    .replace("__STEP4_SRC__", _STEP4_SRC)
+    .replace("__STEP5_SRC__", _STEP5_SRC)
+)
 
 # Markdown treats lines indented 4+ spaces as code blocks, so flatten the indentation.
 GUIDE_HTML = "\n".join(line.lstrip() for line in GUIDE_HTML.splitlines())
