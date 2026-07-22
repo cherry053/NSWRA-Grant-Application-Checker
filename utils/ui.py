@@ -16,11 +16,6 @@ from core.models import CriterionResult
 
 STATIC_DIR = Path(__file__).parent.parent / "static"
 
-# Served by Streamlit's static file route (server.enableStaticServing).
-NSW_DESIGN_SYSTEM_CSS = (
-    '<link rel="stylesheet" href="/app/static/vendor/nsw-design-system-3.24.10.css">'
-)
-
 # NSW Design System palette. Every text/background pairing used below meets
 # WCAG AA contrast (white on the status colours, dark text on the tints).
 NSW_TEXT_DARK = "#22272B"
@@ -94,7 +89,14 @@ def render_splash() -> None:
 
 def render_header(title: str) -> None:
     """Inject the stylesheets and render the NSW masthead, header, and title bar."""
-    st.markdown(NSW_DESIGN_SYSTEM_CSS, unsafe_allow_html=True)
+    # Inlined rather than served via Streamlit's static file route: on some
+    # deployment hosts (e.g. Streamlit Community Cloud) that route is
+    # unreliable, and a missing stylesheet leaves the raw SVG logos and
+    # markup unstyled ("images look weird").
+    st.markdown(
+        f"<style>{_load('vendor', 'nsw-design-system-3.24.10.css')}</style>",
+        unsafe_allow_html=True,
+    )
     st.markdown(f"<style>{_load('css', 'main.css')}</style>", unsafe_allow_html=True)
     render_masthead()
     st.markdown(_load("html", "header.html"), unsafe_allow_html=True)
