@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+.env
+.env.*
+.DS_Store
+.pytest_cache/
+.mypy_cache/
+.streamlit/secrets.toml
+.claude/

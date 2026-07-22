@@ -1,0 +1,14 @@
+# Streamlit runtime configuration for the Application Checker.
+
+[server]
+# Serve static/ through /app/static/... so the vendored NSW Design System
+# stylesheet loads without any CDN dependency (see utils/ui.py).
+enableStaticServing = true
+# The upload form promises "one PDF file, up to 100MB"; enforce it here
+# (Streamlit's default is 200MB).
+maxUploadSize = 100
+
+
+[theme]
+
+base = "light"

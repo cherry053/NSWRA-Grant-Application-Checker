@@ -1,0 +1,609 @@
+/* ==========================================================================
+   Grant Application Quality Checker — NSW Government styling
+   Palette: NSW brand dark #002664, brand red #D7153A, text #22272B,
+   status success #008A07 / warning #C95000 / error #B81237.
+   All colour pairings meet WCAG AA contrast.
+   ========================================================================== */
+
+/* ---- Streamlit chrome ---------------------------------------------------- */
+
+[data-testid="stSidebar"],
+[data-testid="stSidebarCollapsedControl"],
+[data-testid="stHeader"],
+[data-testid="stHeaderCollapsedControl"] {
+    display: none;
+}
+
+[data-testid="stMainBlockContainer"] {
+    padding-top: 0;
+    width: 100% !important;
+    max-width: none !important;
+}
+
+/* Full-bleed NSW masthead regardless of Streamlit's container padding. */
+.nsw-masthead,
+.nsw-skip {
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+}
+
+.nsw-masthead .nsw-container {
+    padding-left: 1rem;
+}
+
+/* ---- Keyboard focus (WCAG 2.4.7) ----------------------------------------- */
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[role="combobox"]:focus-visible,
+[data-baseweb="select"] *:focus-visible {
+    outline: 3px solid #0086B3 !important;
+    outline-offset: 2px;
+}
+
+/* ---- Page title bar ------------------------------------------------------ */
+
+.header-bar {
+    background-color: #002664;
+    padding: 14px 24px;
+    border-radius: 2px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+/* Extra specificity: Streamlit's own markdown heading styles must not win. */
+.header-bar h1.header-title {
+    color: #FFFFFF !important;
+    font-size: clamp(20px, 3vw, 30px);
+    font-weight: 600;
+    margin: 0;
+    padding: 0;
+    line-height: 1.25;
+}
+
+/* The stylesheet-injection markdown blocks are invisible but still occupy
+   flex-gap slots, stacking blank space above the masthead. Collapse them. */
+[data-testid="stElementContainer"]:has([data-testid="stMarkdownContainer"] > link:first-child:last-child),
+[data-testid="stElementContainer"]:has([data-testid="stMarkdownContainer"] > style:first-child:last-child) {
+    display: none;
+}
+
+/* The splash overlay is position:fixed; keep its container out of the flow
+   so it does not add an empty gap either. */
+[data-testid="stElementContainer"]:has(.nsw-splash) {
+    position: absolute;
+}
+
+/* ---- Splash (first load) ------------------------------------------------- */
+
+.nsw-splash {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #FFFFFF;
+    animation: nsw-splash-fade 0.5s ease 1.4s forwards;
+}
+
+.nsw-splash__content {
+    text-align: center;
+}
+
+.nsw-splash__logo {
+    width: 92px;
+    height: auto;
+}
+
+.nsw-splash__title {
+    margin: 16px 0 24px;
+    color: #002664;
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.nsw-splash__spinner {
+    width: 36px;
+    height: 36px;
+    margin: 0 auto;
+    border: 4px solid #EBEBEB;
+    border-top-color: #D7153A;
+    border-radius: 50%;
+    animation: nsw-splash-spin 0.9s linear infinite;
+}
+
+.nsw-splash__message {
+    margin-top: 16px;
+    color: #22272B;
+    font-size: 15px;
+}
+
+@keyframes nsw-splash-spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes nsw-splash-fade {
+    to { opacity: 0; visibility: hidden; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nsw-splash {
+        animation-delay: 0.4s;
+        animation-duration: 0.1s;
+    }
+    .nsw-splash__spinner {
+        animation-duration: 2s;
+    }
+}
+
+/* ---- Upload form --------------------------------------------------------- */
+
+[data-testid="stFileUploaderDropzone"] button {
+    background-color: transparent;
+    color: #002664;
+    border: 2px solid #002664;
+    border-radius: 4px;
+    font-weight: 600;
+    padding: 8px 20px;
+}
+
+[data-testid="stFileUploaderDropzone"] button:hover {
+    background-color: #002664;
+    color: #FFFFFF;
+}
+
+[data-testid="stFileUploaderDropzone"] button:hover svg {
+    background-color: #002664;
+    fill: #FFFFFF;
+}
+
+[data-testid="stFormSubmitButton"] button {
+    background-color: #002664;
+    color: #FFFFFF;
+    border: 2px solid #002664;
+    border-radius: 4px;
+    font-weight: 600;
+    padding: 8px 20px;
+}
+
+[data-testid="stFormSubmitButton"] button:hover {
+    background-color: transparent;
+    color: #002664;
+}
+
+/* ---- Buttons (NSW primary/secondary) ------------------------------------- */
+
+.stButton button,
+.stDownloadButton button {
+    border-radius: 4px;
+    font-weight: 600;
+    border: 2px solid #002664;
+}
+
+.stButton button[kind="primary"],
+.stDownloadButton button[kind="primary"] {
+    background-color: #002664;
+    color: #FFFFFF;
+}
+
+.stButton button[kind="primary"]:hover:enabled {
+    background-color: #FFFFFF;
+    color: #002664;
+    border-color: #002664;
+}
+
+.stButton button[kind="secondary"],
+.stDownloadButton button[kind="secondary"] {
+    background-color: #FFFFFF;
+    color: #002664;
+}
+
+.stButton button[kind="secondary"]:hover:enabled,
+.stDownloadButton button[kind="secondary"]:hover:enabled {
+    background-color: #002664;
+    color: #FFFFFF;
+}
+
+.stButton button[kind="tertiary"] {
+    border: none;
+    color: #002664;
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+.stButton button:disabled,
+.stDownloadButton button:disabled {
+    border-color: #CDD3D6;
+    color: #6D7175;
+    background-color: #F2F2F2;
+}
+
+/* ---- Form inputs ---------------------------------------------------------- */
+
+.stTextInput input,
+.stTextArea textarea {
+    border: 1px solid #4C5356;
+    border-radius: 4px;
+    color: #22272B;
+}
+
+.stMultiSelect [data-baseweb="select"] > div {
+    border: 1px solid #4C5356;
+    border-radius: 4px;
+}
+
+/* Selected-status chips inside the multiselect. */
+.stMultiSelect [data-baseweb="tag"] {
+    background-color: #002664;
+    color: #FFFFFF;
+    border-radius: 4px;
+}
+
+.stMultiSelect [data-baseweb="tag"] span[role="presentation"] {
+    color: #FFFFFF;
+}
+
+/* ---- Filter panel ---------------------------------------------------------- */
+
+.st-key-filter_panel {
+    background-color: #F2F2F2;
+    border: 1px solid #DEE3E5;
+    border-left: 6px solid #002664;
+    border-radius: 4px;
+    padding: 20px 24px 12px;
+    margin-bottom: 8px;
+}
+
+.filter-panel__heading {
+    color: #002664;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 4px;
+}
+
+.filter-panel__count {
+    color: #22272B;
+    font-size: 15px;
+    margin: 4px 0 8px;
+}
+
+.filter-panel__count strong {
+    color: #002664;
+}
+
+/* ---- Results view ---------------------------------------------------------- */
+
+.readiness-badge {
+    border: 2px solid;
+    border-radius: 4px;
+    padding: 12px;
+    text-align: center;
+    background-color: #FFFFFF;
+}
+
+.readiness-badge__label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.readiness-badge__value {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.criteria-row {
+    border-left: 4px solid;
+    padding: 10px 16px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.criteria-row__icon {
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+.criteria-row__icon svg {
+    display: block;
+}
+
+.criteria-row__name {
+    color: #22272B;
+    font-weight: 600;
+    flex: 1;
+}
+
+.criteria-row__badge {
+    border-radius: 24px;
+    padding: 2px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    min-width: 84px;
+    text-align: center;
+    display: inline-block;
+    color: #FFFFFF;
+}
+
+/* One colour scheme per criterion status: row tint, left border, and badge. */
+.criteria-row--pass   { border-left-color: #008A07; background-color: #E5F6E6; }
+.criteria-row--review { border-left-color: #C95000; background-color: #FDEDDF; }
+.criteria-row--fail   { border-left-color: #B81237; background-color: #F7E7EB; }
+
+.criteria-row--pass   .criteria-row__badge { background-color: #008A07; }
+.criteria-row--review .criteria-row__badge { background-color: #C95000; }
+.criteria-row--fail   .criteria-row__badge { background-color: #B81237; }
+
+/* ---- Empty states ---------------------------------------------------------- */
+
+.nsw-empty-state {
+    border: 1px dashed #8A9296;
+    border-radius: 4px;
+    background-color: #F9FBFC;
+    text-align: center;
+    padding: 40px 24px;
+    margin: 8px 0 16px;
+}
+
+.nsw-empty-state__title {
+    color: #002664;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 8px;
+}
+
+.nsw-empty-state__message {
+    color: #22272B;
+    margin: 0;
+}
+
+/* ---- Active flags cards ----------------------------------------------------- */
+
+.flag-card {
+    border: 1px solid #DEE3E5;
+    border-left: 6px solid #4C5356;
+    border-radius: 4px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    background-color: #FFFFFF;
+}
+
+.flag-card--fail   { border-left-color: #B81237; background-color: #F7E7EB; }
+.flag-card--review { border-left-color: #C95000; background-color: #FDEDDF; }
+.flag-card--info   { border-left-color: #2E5299; background-color: #EAEDF4; }
+
+.flag-card__head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.flag-card__badge {
+    display: inline-block;
+    border: 1px solid transparent;
+    border-radius: 24px;
+    padding: 2px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #FFFFFF;
+}
+
+.flag-card--fail   .flag-card__badge { background-color: #B81237; }
+.flag-card--review .flag-card__badge { background-color: #C95000; }
+.flag-card--info   .flag-card__badge { background-color: #2E5299; }
+
+.flag-card__category {
+    color: #4C5356;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.flag-card__name {
+    color: #22272B;
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0 0 4px;
+}
+
+.flag-card__detail {
+    color: #22272B;
+    font-size: 14px;
+    line-height: 1.45;
+    margin: 0;
+    max-width: 62ch;
+}
+
+.flags-empty {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #C7E7C9;
+    border-left: 6px solid #008A07;
+    background-color: #E5F6E6;
+    border-radius: 4px;
+    color: #22272B;
+    padding: 14px 16px;
+    font-weight: 600;
+}
+
+.flags-empty__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background-color: #008A07;
+    color: #FFFFFF;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+/* ---- Processing (loading) page --------------------------------------------- */
+
+.processing-hero {
+    text-align: center;
+    padding: 8px 0 4px;
+}
+
+.processing-hero__file {
+    color: #002664;
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0;
+    word-break: break-word;
+}
+
+.processing-hero__sub {
+    color: #4C5356;
+    font-size: 15px;
+    margin: 6px 0 0;
+}
+
+.processing-steps {
+    list-style: none;
+    margin: 8px auto 0;
+    padding: 0;
+    max-width: 760px;
+}
+
+.processing-step {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border: 1px solid #DEE3E5;
+    border-radius: 6px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    background-color: #FFFFFF;
+    color: #6D7175;
+    font-size: 16px;
+    transition: background-color .2s ease, color .2s ease, border-color .2s ease;
+}
+
+.processing-step__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid #CDD3D6;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.processing-step--done {
+    border-color: #008A07;
+    background-color: #E5F6E6;
+    color: #14501A;
+    font-weight: 600;
+}
+
+.processing-step--done .processing-step__icon {
+    border-color: #008A07;
+    background-color: #008A07;
+    color: #FFFFFF;
+}
+
+.processing-step--active {
+    border-color: #002664;
+    background-color: #EAF0F6;
+    color: #002664;
+    font-weight: 700;
+}
+
+.processing-step--active .processing-step__icon {
+    border-color: #002664;
+    border-top-color: transparent;
+    animation: nsw-splash-spin 0.9s linear infinite;
+}
+
+.processing-note {
+    border-left: 4px solid #C95000;
+    background-color: #FDEDDF;
+    color: #22272B;
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin-top: 8px;
+    max-width: 760px;
+    font-size: 14px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .processing-step--active .processing-step__icon {
+        animation-duration: 2s;
+    }
+}
+
+/* ---- Metrics ---------------------------------------------------------------- */
+
+[data-testid="stMetric"] {
+    background-color: #FFFFFF;
+    border: 1px solid #DEE3E5;
+    border-top: 4px solid #002664;
+    border-radius: 4px;
+    padding: 16px;
+}
+
+[data-testid="stMetricValue"] {
+    color: #002664;
+    font-weight: 700;
+    font-size: 24px;
+}
+
+/* ---- NSW component fixes ------------------------------------------------------ */
+
+.nsw-form__helper--invalid {
+    align-items: center;
+    background-color: #F7E7EB;
+    border-left: 4px solid #B81237;
+    color: #22272B;
+    display: flex;
+    font-weight: 700;
+    margin-top: .5rem;
+    padding: .75rem;
+}
+
+.nsw-footer__group ul {
+    display: flex;
+    flex-direction: column;
+}
+
+.footer-columns {
+    display: flex;
+    gap: 48px;
+    flex-wrap: wrap;
+}
+
+.footer-columns .nsw-footer__group {
+    flex: 1;
+    min-width: 220px;
+}
+
+/* ---- Responsive ---------------------------------------------------------------- */
+
+@media (max-width: 640px) {
+    .header-bar {
+        padding: 12px 16px;
+    }
+
+    .st-key-filter_panel {
+        padding: 16px 16px 8px;
+    }
+}
