@@ -1,6 +1,8 @@
 import streamlit as st
 
 st.set_page_config(page_title="Results | Grant Application Quality Checker", layout="wide")
+st.page_link("app.py", label="Back to Grant Application Quality Checker", icon=":material/arrow_back:")
+
 
 from core.filters import (
     VALID_STATUSES,
