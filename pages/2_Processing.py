@@ -117,5 +117,9 @@ time.sleep(MIN_STAGE_SECONDS)
 
 st.session_state["check_result"] = result
 st.session_state.pop("processing_input", None)
+# The Results page caches its PDF report keyed by (application_id, scanned_at);
+# scanned_at only has minute precision, so re-checking the same application
+# within a minute would otherwise serve the previous report.
+st.session_state.pop("_report_pdf_cache", None)
 
 st.switch_page("pages/1_Results.py")

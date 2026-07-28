@@ -15,6 +15,80 @@ from core.sections import (
 
 DATE_FORMAT = "%d/%m/%Y"
 
+# Words and phrases that may indicate costs that are not eligible for disaster
+# restoration funding. These are flagged as amber (Review) rather than red
+# (Fail) because eligibility can sometimes be confirmed if there is sufficient
+# evidence that the expense is directly associated with restoration works.
+AMBER_INELIGIBILITY_KEYWORDS = [
+    "cleanup",
+    "cleaning debris",
+    "routine clean up",
+    "park clean up",
+    "green waste removal",
+    "green waste disposal",
+    "vegetation clearance",
+    "tree management",
+    "landscape restoration",
+    "arboricultural services",
+    "hazard reduction",
+    "bushland restoration",
+    "environmental restoration",
+    "land rehabilitation",
+    "revegetation",
+    "enhancement planting",
+    "ecological works",
+    "stabilisation works",
+    "remediation",
+    "maintenance activities",
+    "routine maintenance",
+    "ongoing maintenance",
+    "defect correction",
+    "preventative works",
+    "upgrade to current standards",
+    "capacity increase",
+    "expansion works",
+    "additional functionality",
+    "asset improvement",
+    "betterment opportunity",
+    "renewal works",
+    "deferred maintenance",
+    "defect rectification",
+    "future-proofing",
+    "general maintenance",
+    "operational expenditure",
+    "administrative support",
+    "new works",
+    "enhancement",
+    "modernisation",
+    "beautification",
+    "redevelopment",
+    "memorials",
+    "legal disputes",
+    "interest charges",
+    "plant replacement",
+    "vehicles",
+    "upgrade",
+    "betterment",
+    "new asset",
+    "expansion",
+    "pre-existing damage",
+    "wear and tear",
+    "asset renewal",
+    "lifecycle replacement",
+    "operational costs",
+    "administration overheads",
+    "internal overhead recovery",
+    "contents replacement",
+    "insurance excess",
+    "uninsured loss",
+    "penalties",
+    "fines",
+    "land acquisition",
+    "religious facilities",
+    "strategic project",
+    "amenity improvements",
+]
+
 # Coordinate bounds stated on the form for damage locations within NSW.
 LONGITUDE_MIN, LONGITUDE_MAX = 140.902254, 153.730439
 LATITUDE_MIN, LATITUDE_MAX = -37.633837, -28.592358
@@ -243,7 +317,7 @@ def _item_required_fields(item: DamageItem, label: str) -> CriterionResult:
         # "Asset Sub-Category": item.sub_category,
         "Asset Capacity": item.capacity,
         "Asset Layout": item.layout,
-        "Asset Dimensions": item.dimensions,
+        # "Asset Dimensions": item.dimensions,
         "Damage Description": item.damage_description,
         "Estimation Method": item.estimation_method,
         "Pre-Disaster Evidence": item.pre_disaster_evidence_file,
@@ -316,7 +390,9 @@ def _item_cost_check(item: DamageItem, label: str) -> CriterionResult:
 def _expected_evidence_name(damage_id: str, filename: str, expected_suffix: str) -> Optional[str]:
     """None when the filename follows '<DamageID>_<ExpectedSuffix>.<ext>', else the problem."""
     stem = filename.rsplit(".", 1)[0] if "." in filename else filename
-    prefix, separator, suffix = stem.partition("_")
+    # The suffix never contains an underscore but a damage item ID may, so the
+    # split anchors on the last underscore rather than the first.
+    prefix, separator, suffix = stem.rpartition("_")
     if not separator:
         return f"'{filename}' has no underscore separator"
     if prefix != damage_id:
@@ -365,6 +441,50 @@ def _item_file_size_check(item: DamageItem, label: str) -> CriterionResult:
     return CriterionResult(name, passed, "warning", detail)
 
 
+def _item_ineligibility_keyword_check(item: DamageItem, label: str) -> CriterionResult:
+    name = f"{label} - Potentially Ineligible Cost Description"
+
+    # Combine the free-text fields into one block of text to search through.
+    fields = [
+        item.damage_description,
+        item.estimation_method,
+        item.methodology,
+        item.asset_name,
+    ]
+    combined_text = ""
+    for field in fields:
+        if field is not None:
+            combined_text = combined_text + " " + field
+    combined_text = combined_text.lower()
+
+    # Check each keyword against the combined text.
+    matched_keywords = []
+    for keyword in AMBER_INELIGIBILITY_KEYWORDS:
+        if keyword in combined_text:
+            matched_keywords.append(keyword)
+
+    # Keep only the most specific phrase when matches overlap: a description
+    # containing "upgrade to current standards" also contains "upgrade", and
+    # repeating the shorter keyword would flag the same text twice.
+    matched_keywords = [
+        keyword
+        for keyword in matched_keywords
+        if not any(keyword != other and keyword in other for other in matched_keywords)
+    ]
+
+    if len(matched_keywords) == 0:
+        return CriterionResult(name, True, "warning", "No potentially ineligible cost keywords detected.")
+
+    keyword_list = ", ".join(matched_keywords)
+    detail = (
+        "The following terms may indicate costs that are not eligible for disaster restoration "
+        "funding: " + keyword_list + ". "
+        "Eligibility could be assessed if there is sufficient evidence that the expense is "
+        "associated with restoration works."
+    )
+    return CriterionResult(name, False, "warning", detail)
+
+
 def damage_item_checks(item: DamageItem, position: int) -> list[CriterionResult]:
     label = item.damage_item_id or f"Item {position}"
     return stamp_section(
@@ -377,6 +497,7 @@ def damage_item_checks(item: DamageItem, position: int) -> list[CriterionResult]
             _item_cost_check(item, label),
             _item_naming_check(item, label),
             _item_file_size_check(item, label),
+            _item_ineligibility_keyword_check(item, label),
         ],
     )
 

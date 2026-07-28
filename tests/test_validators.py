@@ -14,8 +14,13 @@ sys.path.insert(0, str(Path(__file__).parent))
 from test_paste_precheck import make_record
 
 from core.damage_table_parser import parse_damage_table
-from core.models import ApplicationData
-from core.validators import run_checks, selection_notices
+from core.models import ApplicationData, DamageItem
+from core.validators import (
+    _expected_evidence_name,
+    _item_ineligibility_keyword_check,
+    run_checks,
+    selection_notices,
+)
 
 
 def _criterion(result, name):
@@ -49,6 +54,35 @@ def test_notices_group_affected_items_and_ask_for_a_double_check():
     assert len(notices) == 2  # one per limitation, not one per item
     assert all("double-check" in notice for notice in notices)
     assert all("DI-001, DI-002" in notice for notice in notices)
+
+
+def test_ineligibility_keywords_raise_a_review_flag():
+    item = DamageItem(damage_description="Routine maintenance and cleanup of the road reserve")
+    check = _item_ineligibility_keyword_check(item, "DI-001")
+    assert not check.passed
+    assert check.severity == "warning"  # amber Review, never a red Fail
+    assert "routine maintenance" in check.detail
+    assert "cleanup" in check.detail
+
+
+def test_ineligibility_keywords_report_the_most_specific_phrase_once():
+    item = DamageItem(damage_description="Upgrade to current standards for the culvert")
+    check = _item_ineligibility_keyword_check(item, "DI-001")
+    assert "upgrade to current standards" in check.detail
+    # The shorter "upgrade" keyword also matches but must not repeat the flag.
+    assert ", upgrade" not in check.detail
+
+
+def test_clean_description_raises_no_keyword_flag():
+    item = DamageItem(damage_description="Reconstruct storm-damaged pavement to pre-disaster condition")
+    check = _item_ineligibility_keyword_check(item, "DI-001")
+    assert check.passed
+
+
+def test_evidence_naming_accepts_underscores_in_the_damage_id():
+    assert _expected_evidence_name("DI_001", "DI_001_PredisasterEvidence.jpg", "predisasterevidence") is None
+    assert _expected_evidence_name("DI-001", "DI-001_DamageEvidence.png", "damageevidence") is None
+    assert _expected_evidence_name("DI-001", "DI-002_DamageEvidence.png", "damageevidence") is not None
 
 
 def test_notices_never_lower_the_confidence_score():
