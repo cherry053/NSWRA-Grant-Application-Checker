@@ -231,12 +231,19 @@ def _parse_locations(item: DamageItem, lines: list[str], cursor: int) -> int:
 
 
 def _parse_sub_category(item: DamageItem, lines: list[str], cursor: int) -> int:
-    """Skip the option dump; the selected value follows the group's Clear line."""
+    """Skip the option dump and recover the ticked "Other:" free-text answer.
+
+    That free-text value normally sits before the group's Clear line, but some
+    exports place it after instead, so both positions are checked.
+    """
     while cursor < len(lines) and lines[cursor] in SUB_CATEGORY_OPTIONS:
+        cursor += 1
+    if cursor < len(lines) and not _is_clear_anchor(lines[cursor]):
+        item.sub_category = lines[cursor]
         cursor += 1
     if cursor < len(lines) and _is_clear_anchor(lines[cursor]) and "Asset Sub-Category" in lines[cursor]:
         cursor += 1
-        if cursor < len(lines) and not _is_clear_anchor(lines[cursor]):
+        if item.sub_category is None and cursor < len(lines) and not _is_clear_anchor(lines[cursor]):
             item.sub_category = lines[cursor]
             cursor += 1
     if item.sub_category is None:
@@ -248,7 +255,11 @@ def _parse_asset_attributes(item: DamageItem, lines: list[str], cursor: int) -> 
     """Classification type, capacity, layout, and dimensions, in column order."""
     scalars: list[str] = []
     while cursor < len(lines) and lines[cursor] not in MATERIAL_OPTIONS and not _is_clear_anchor(lines[cursor]):
-        scalars.append(lines[cursor])
+        line = lines[cursor]
+        # Unused custom-text slot next to the Classification Type selection;
+        # it renders as a bare "Other" with no accompanying value.
+        if line != "Other":
+            scalars.append(line)
         cursor += 1
 
     # scalars[0] is the classification type, which no check consumes.
@@ -274,6 +285,10 @@ def _parse_material_and_function(item: DamageItem, lines: list[str], cursor: int
     note (a double-check disclaimer) rather than a parse warning.
     """
     while cursor < len(lines) and lines[cursor] in MATERIAL_OPTIONS:
+        cursor += 1
+    # A ticked "Other:" option's free-text answer sits here, before the Clear
+    # line; skip over it too so the Clear-line check below still fires.
+    if cursor < len(lines) and not _is_clear_anchor(lines[cursor]):
         cursor += 1
     if cursor < len(lines) and _is_clear_anchor(lines[cursor]) and "Asset Material" in lines[cursor]:
         cursor += 1
